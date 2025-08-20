@@ -1,0 +1,358 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Credit Card Fraud Detection</title>
+  <style>
+    :root{
+      --bg:#0f172a;
+      --card:#0b1220;
+      --muted:#94a3b8;
+      --text:#e2e8f0;
+      --brand:#6ee7b7;
+      --accent:#22d3ee;
+      --danger:#ef4444;
+      --warn:#f59e0b;
+      --ok:#10b981;
+      --ring: rgba(34,211,238,.35);
+      --shadow: 0 10px 30px rgba(2,8,23,.5);
+      --radius:16px;
+    }
+    *{box-sizing:border-box}
+    body{
+      margin:0; background: radial-gradient(1200px 1200px at 20% -10%, rgba(34,211,238,.15), transparent 60%),
+                           radial-gradient(1000px 900px at 120% 10%, rgba(110,231,183,.12), transparent 55%),
+                           var(--bg);
+      color:var(--text); font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+      min-height:100vh;
+    }
+    header{
+      padding:48px 16px; text-align:center;
+    }
+    .title{
+      font-weight:800; font-size: clamp(28px, 4vw, 44px);
+      letter-spacing:.2px;
+      background: linear-gradient(90deg, var(--brand), var(--accent));
+      -webkit-background-clip:text; background-clip:text; color:transparent;
+      margin:0 0 8px;
+    }
+    .subtitle{color:var(--muted); font-size: clamp(14px, 2vw, 18px); margin:0 auto; max-width: 780px}
+    .container{max-width: 980px; margin: 24px auto 64px; padding: 0 16px;}
+    .grid{display:grid; gap:20px; grid-template-columns: 1fr; }
+    @media(min-width: 980px){ .grid{ grid-template-columns: 420px 1fr; } }
+
+    .card{
+      background: linear-gradient(180deg, rgba(255,255,255,.02), transparent 40%), var(--card);
+      border:1px solid rgba(148,163,184,.15);
+      border-radius: var(--radius);
+      padding:22px;
+      box-shadow: var(--shadow);
+      backdrop-filter: blur(8px);
+    }
+
+    h2{margin:6px 0 8px; font-size:20px; font-weight:700}
+    p{color:var(--muted); line-height:1.6}
+
+    label{display:block; font-size:14px; margin:12px 0 6px; color:#cbd5e1}
+    input[type="text"], input[type="email"], input[type="file"]{
+      width:100%; background: #0a0f1a; border:1px solid rgba(148,163,184,.2);
+      padding:12px 14px; border-radius:12px; color:var(--text); outline:none;
+    }
+    input[type="text"]:focus, input[type="email"]:focus, input[type="file"]:focus{
+      border-color: var(--accent); box-shadow: 0 0 0 4px var(--ring);
+    }
+    .row{display:flex; gap:12px}
+    .row > * {flex:1}
+
+    .checkbox{
+      display:flex; align-items:center; gap:10px; margin-top:10px; color:#cbd5e1; font-size:14px
+    }
+    .hint{font-size:12px; color:var(--muted); margin-top:6px}
+
+    .btn{
+      appearance:none; border:none; cursor:pointer;
+      padding:12px 16px; border-radius:12px; font-weight:700;
+      color:#06202b; background: linear-gradient(90deg, var(--brand), var(--accent));
+      box-shadow: 0 10px 20px rgba(34,211,238,.25), inset 0 -6px rgba(0,0,0,.15);
+      transition: transform .05s ease;
+      margin-top:14px; width:100%;
+    }
+    .btn:active{ transform: translateY(1px) }
+
+    .progress-wrap{margin-top:14px}
+    progress{
+      width:100%; height:14px; appearance:none;
+      border-radius:999px; overflow:hidden; background:#0a0f1a; border:1px solid rgba(148,163,184,.2)
+    }
+    progress::-webkit-progress-bar{ background:#0a0f1a }
+    progress::-webkit-progress-value{ background: linear-gradient(90deg, var(--accent), var(--brand)) }
+    .progress-label{display:flex; justify-content:space-between; font-size:12px; color:var(--muted); margin-top:6px}
+
+    .results-header{display:flex; align-items:center; justify-content:space-between; gap:12px}
+    .downloads{display:flex; gap:8px; flex-wrap:wrap}
+    .link{
+      display:inline-flex; align-items:center; gap:8px; font-size:13px; padding:8px 12px;
+      border-radius:10px; border:1px solid rgba(148,163,184,.2); color:#dbeafe; text-decoration:none;
+      background:#0a0f1a;
+    }
+    .link:hover{border-color:var(--accent)}
+
+    .table-wrap{overflow:auto; border:1px solid rgba(148,163,184,.15); border-radius:14px}
+    table{border-collapse: collapse; width:100%; min-width: 760px; background:#060b13}
+    th, td{padding:10px 12px; border-bottom: 1px solid rgba(148,163,184,.12); font-size:13px; text-align:left}
+    th{position:sticky; top:0; background:#0b1220; z-index:1}
+
+    .toast{
+      position: fixed; right: 16px; top: 16px; z-index: 9999;
+      background:#0b1220; border:1px solid rgba(148,163,184,.2); border-left:4px solid var(--ok);
+      color:var(--text); padding:12px 14px; border-radius:12px; box-shadow: var(--shadow);
+      display:none; max-width: 360px
+    }
+    .toast.error{ border-left-color: var(--danger) }
+    .toast.warn{ border-left-color: var(--warn) }
+
+    details{margin-top:10px}
+    summary{cursor:pointer; color:#cbd5e1}
+    code{background:#0a0f1a; padding:2px 6px; border-radius:6px}
+  </style>
+</head>
+<body>
+  <header>
+    <h1 class="title">Credit Card Fraud Detection</h1>
+    <p class="subtitle">
+      Upload your transaction data (CSV/XLS/XLSX). We preprocess it and run a trained XGBoost model to flag potential fraud.
+      You’ll get a preview, downloadable reports, and an emailed copy.
+    </p>
+  </header>
+
+  <div class="container grid">
+    <!-- Left: Form -->
+    <section class="card">
+      <h2>Upload & Analyze</h2>
+      <p class="hint">Fields marked * are required.</p>
+
+      <form id="uploadForm">
+        <label for="name">Name *</label>
+        <input id="name" name="name" type="text" placeholder="Your name" required />
+
+        <label for="email">Email *</label>
+        <input id="email" name="email" type="email" placeholder="you@example.com" required />
+        <p class="hint">We’ll email your report as an attachment.</p>
+
+        <label for="file">Upload File (CSV / XLS / XLSX) *</label>
+        <input id="file" name="file" type="file" accept=".csv,.xls,.xlsx" required />
+
+        <div class="checkbox">
+          <input id="consent" name="consent" type="checkbox" />
+          <label for="consent">I consent to my data being used to improve the model.</label>
+        </div>
+
+        <button class="btn" type="submit">Run Prediction</button>
+
+        <div class="progress-wrap" style="display:none" id="progressWrap">
+          <progress id="progressBar" value="0" max="100"></progress>
+          <div class="progress-label">
+            <span id="progressText">Uploading…</span>
+            <span id="progressPct">0%</span>
+          </div>
+        </div>
+      </form>
+
+      <details>
+        <summary>What happens to my file?</summary>
+        <p class="hint" style="margin-top:6px">
+          We temporarily save your processed results (CSV + Excel) so you can download or receive them via email.
+          If you check consent, we append the processed rows plus minimal metadata (name, email, timestamp)
+          to a master dataset (<code>master_dataset.csv</code>) to retrain the model later.
+        </p>
+      </details>
+
+      <details>
+        <summary>How the model works (short version)</summary>
+        <p class="hint" style="margin-top:6px">
+          Your data goes through preprocessing (imputation + one-hot encoding) in a scikit-learn pipeline.
+          We use <code>XGBoost</code> for classification. The model was tuned via <code>Optuna</code> and persisted with <code>joblib</code>.
+        </p>
+      </details>
+    </section>
+
+    <!-- Right: Results -->
+    <section class="card">
+      <div class="results-header">
+        <h2>Results Preview</h2>
+        <div class="downloads" id="downloads" style="display:none">
+          <a id="dlCSV" class="link" href="#" download>⬇ Download CSV</a>
+          <a id="dlXLSX" class="link" href="#" download>⬇ Download Excel</a>
+        </div>
+      </div>
+
+      <div id="emptyState">
+        <p class="hint">No results yet. Upload a file to see predictions (first 20 rows preview will appear here).</p>
+      </div>
+
+      <div class="table-wrap" id="tableWrap" style="display:none">
+        <table id="resultsTable"></table>
+      </div>
+    </section>
+  </div>
+
+  <div class="toast" id="toast"></div>
+
+  <script>
+    // ---------- Config ----------
+    const API_BASE = "http://127.0.0.1:8000"; // change if backend runs elsewhere
+
+    // ---------- UI helpers ----------
+    const toast = document.getElementById('toast');
+    function showToast(msg, type='ok', ms=4200){
+      toast.className = 'toast' + (type==='error' ? ' error' : type==='warn' ? ' warn' : '');
+      toast.innerText = msg;
+      toast.style.display = 'block';
+      setTimeout(()=>{ toast.style.display='none'; }, ms);
+    }
+
+    function buildTable(rows){
+      const table = document.getElementById('resultsTable');
+      table.innerHTML = '';
+      if(!rows || !rows.length){
+        table.innerHTML = '<tr><td style="padding:14px; color:#94a3b8">No predictions received.</td></tr>';
+        return;
+      }
+      const thead = document.createElement('thead');
+      const headerRow = document.createElement('tr');
+      Object.keys(rows[0]).forEach(k=>{
+        const th = document.createElement('th'); th.textContent = k; headerRow.appendChild(th);
+      });
+      thead.appendChild(headerRow);
+
+      const tbody = document.createElement('tbody');
+      rows.forEach(r=>{
+        const tr = document.createElement('tr');
+        Object.keys(rows[0]).forEach(k=>{
+          const td = document.createElement('td');
+          const v = r[k];
+          td.textContent = (v===null || v===undefined) ? '' : String(v);
+          tr.appendChild(td);
+        });
+        tbody.appendChild(tr);
+      });
+
+      table.appendChild(thead);
+      table.appendChild(tbody);
+    }
+
+    // ---------- Form handling with progress ----------
+    const form = document.getElementById('uploadForm');
+    const emailEl = document.getElementById('email');
+    const fileEl = document.getElementById('file');
+    const consentEl = document.getElementById('consent');
+    const progressWrap = document.getElementById('progressWrap');
+    const progressBar = document.getElementById('progressBar');
+    const progressPct = document.getElementById('progressPct');
+    const progressText = document.getElementById('progressText');
+
+    const downloads = document.getElementById('downloads');
+    const dlCSV = document.getElementById('dlCSV');
+    const dlXLSX = document.getElementById('dlXLSX');
+    const tableWrap = document.getElementById('tableWrap');
+    const emptyState = document.getElementById('emptyState');
+
+    function validateEmail(email){
+      return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(String(email).toLowerCase());
+    }
+
+    form.addEventListener('submit', (e)=>{
+      e.preventDefault();
+
+      // Basic front-end validations
+      const name = document.getElementById('name').value.trim();
+      const email = emailEl.value.trim();
+      const file = fileEl.files[0];
+
+      if(!name){
+        showToast('Please enter your name.', 'warn'); return;
+      }
+      if(!email){
+        showToast('Email is required. Please enter your email before continuing.', 'warn'); return;
+      }
+      if(!validateEmail(email)){
+        showToast('Please enter a valid email address.', 'warn'); return;
+      }
+      if(!file){
+        showToast('Please choose a CSV/XLS/XLSX file.', 'warn'); return;
+      }
+      const ext = file.name.split('.').pop().toLowerCase();
+      if(!['csv','xls','xlsx'].includes(ext)){
+        showToast('Unsupported file type. Please upload CSV, XLS or XLSX.', 'warn'); return;
+      }
+
+      const formData = new FormData();
+      formData.append('name', name);
+      formData.append('email', email);
+      if (consentEl.checked) formData.append('consent', 'true');
+      formData.append('file', file);
+
+      // Use XHR to track upload progress
+      const xhr = new XMLHttpRequest();
+      xhr.open('POST', `${API_BASE}/predict`, true);
+
+      progressWrap.style.display = 'block';
+      progressText.textContent = 'Uploading…';
+      progressBar.value = 0; progressPct.textContent = '0%';
+
+      xhr.upload.onprogress = function(e){
+        if(e.lengthComputable){
+          const pct = Math.round((e.loaded / e.total) * 100);
+          progressBar.value = pct;
+          progressPct.textContent = pct + '%';
+          if (pct >= 100) progressText.textContent = 'Processing…';
+        }
+      };
+
+      xhr.onload = function(){
+        progressText.textContent = 'Finalizing…';
+        try {
+          const data = JSON.parse(xhr.responseText || '{}');
+          if (xhr.status >= 200 && xhr.status < 300 && data && data.ok) {
+            // Show downloads if we have file names
+            if (data.processed_file_csv) {
+              dlCSV.href = `${API_BASE}/download/csv/${encodeURIComponent(data.processed_file_csv)}`;
+            }
+            if (data.processed_file_xlsx) {
+              dlXLSX.href = `${API_BASE}/download/excel/${encodeURIComponent(data.processed_file_xlsx)}`;
+            }
+            downloads.style.display = (data.processed_file_csv || data.processed_file_xlsx) ? 'flex' : 'none';
+
+            // Build results table
+            if (Array.isArray(data.results)) {
+              buildTable(data.results);
+              emptyState.style.display = 'none';
+              tableWrap.style.display = 'block';
+              showToast('Prediction complete. Downloads are ready.', 'ok');
+            } else {
+              tableWrap.style.display = 'none';
+              emptyState.style.display = 'block';
+              showToast('Upload complete, but no results were returned.', 'warn');
+            }
+          } else {
+            const msg = (data && data.error) ? data.error : 'Unexpected error from server.';
+            showToast(`Upload failed: ${msg}`, 'error');
+          }
+        } catch(err){
+          showToast('Upload failed: could not parse server response.', 'error');
+        } finally {
+          progressWrap.style.display = 'none';
+        }
+      };
+
+      xhr.onerror = function(){
+        showToast('Network error during upload.', 'error');
+        progressWrap.style.display = 'none';
+      };
+
+      xhr.send(formData);
+    });
+  </script>
+</body>
+</html>
