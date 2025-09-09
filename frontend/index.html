@@ -1,169 +1,255 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Credit Card Fraud Detection</title>
   <style>
-    body {
-      font-family: Arial, sans-serif;
-      background: #f5f7fa;
-      margin: 0;
-      padding: 0;
-      color: #333;
+    :root{
+      --bg:#0f172a; --card:#0b1220; --muted:#94a3b8; --text:#e2e8f0;
+      --brand:#6ee7b7; --accent:#22d3ee; --danger:#ef4444; --warn:#f59e0b; --ok:#10b981;
+      --ring: rgba(34,211,238,.35); --shadow: 0 10px 30px rgba(2,8,23,.5); --radius:16px;
     }
-
-    header {
-      background: #2a5298;
-      color: white;
-      text-align: center;
-      padding: 2rem 1rem;
-      box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+    *{box-sizing:border-box}
+    body{
+      margin:0; background: radial-gradient(1200px 1200px at 20% -10%, rgba(34,211,238,.15), transparent 60%),
+      radial-gradient(1000px 900px at 120% 10%, rgba(110,231,183,.12), transparent 55%), var(--bg);
+      color:var(--text); font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif; min-height:100vh;
     }
-
-    header h1 {
-      margin: 0;
-      font-size: 2rem;
+    header{ padding:48px 16px; text-align:center; }
+    .title{ font-weight:800; font-size: clamp(28px, 4vw, 44px); letter-spacing:.2px;
+      background: linear-gradient(90deg, var(--brand), var(--accent)); -webkit-background-clip:text; background-clip:text; color:transparent;
+      margin:0 0 8px;
     }
-
-    header p {
-      margin-top: 0.5rem;
-      font-size: 1.1rem;
+    .subtitle{color:var(--muted); font-size: clamp(14px, 2vw, 18px); margin:0 auto; max-width: 780px}
+    .container{max-width: 980px; margin: 24px auto 64px; padding: 0 16px;}
+    .grid{display:grid; gap:20px; grid-template-columns: 1fr; }
+    @media(min-width: 980px){ .grid{ grid-template-columns: 420px 1fr; } }
+    .card{ background: linear-gradient(180deg, rgba(255,255,255,.02), transparent 40%), var(--card);
+      border:1px solid rgba(148,163,184,.15); border-radius: var(--radius); padding:22px; box-shadow: var(--shadow); backdrop-filter: blur(8px);
     }
-
-    .container {
-      max-width: 800px;
-      margin: 2rem auto;
-      background: white;
-      border-radius: 12px;
-      padding: 2rem;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    h2{margin:6px 0 8px; font-size:20px; font-weight:700}
+    p{color:var(--muted); line-height:1.6}
+    label{display:block; font-size:14px; margin:12px 0 6px; color:#cbd5e1}
+    input[type="text"], input[type="email"], input[type="file"]{
+      width:100%; background: #0a0f1a; border:1px solid rgba(148,163,184,.2); padding:12px 14px; border-radius:12px; color:var(--text); outline:none;
     }
-
-    h2 {
-      color: #2a5298;
-      margin-bottom: 0.5rem;
+    input[type="text"]:focus, input[type="email"]:focus, input[type="file"]:focus{
+      border-color: var(--accent); box-shadow: 0 0 0 4px var(--ring);
     }
-
-    p.description {
-      font-size: 1rem;
-      margin-bottom: 1.5rem;
-      color: #555;
+    .row{display:flex; gap:12px} .row > * {flex:1}
+    .checkbox{ display:flex; align-items:center; gap:10px; margin-top:10px; color:#cbd5e1; font-size:14px }
+    .hint{font-size:12px; color:var(--muted); margin-top:6px}
+    .btn{ appearance:none; border:none; cursor:pointer; padding:12px 16px; border-radius:12px; font-weight:700;
+      color:#06202b; background: linear-gradient(90deg, var(--brand), var(--accent));
+      box-shadow: 0 10px 20px rgba(34,211,238,.25), inset 0 -6px rgba(0,0,0,.15); transition: transform .05s ease; margin-top:14px; width:100%;
     }
-
-    label {
-      display: block;
-      margin-top: 1rem;
-      font-weight: bold;
-    }
-
-    input[type="text"],
-    input[type="email"],
-    input[type="file"] {
-      width: 100%;
-      padding: 0.6rem;
-      margin-top: 0.4rem;
-      border: 1px solid #ccc;
-      border-radius: 8px;
-    }
-
-    .checkbox {
-      margin-top: 1rem;
-      display: flex;
-      align-items: center;
-    }
-
-    .checkbox input {
-      margin-right: 0.5rem;
-    }
-
-    button {
-      margin-top: 1.5rem;
-      background: #2a5298;
-      color: white;
-      border: none;
-      padding: 0.8rem 1.5rem;
-      border-radius: 8px;
-      cursor: pointer;
-      font-size: 1rem;
-      transition: background 0.3s ease;
-    }
-
-    button:hover {
-      background: #1e3c72;
-    }
-
-    .results {
-      margin-top: 2rem;
-      padding: 1rem;
-      border-radius: 8px;
-      background: #f0f4ff;
-      border: 1px solid #d0d7e2;
-    }
-
-    .results h3 {
-      margin-top: 0;
-      color: #2a5298;
-    }
+    .btn:active{ transform: translateY(1px) }
+    .progress-wrap{margin-top:14px}
+    progress{ width:100%; height:14px; appearance:none; border-radius:999px; overflow:hidden; background:#0a0f1a; border:1px solid rgba(148,163,184,.2) }
+    progress::-webkit-progress-bar{ background:#0a0f1a }
+    progress::-webkit-progress-value{ background: linear-gradient(90deg, var(--accent), var(--brand)) }
+    .progress-label{display:flex; justify-content:space-between; font-size:12px; color:var(--muted); margin-top:6px}
+    .results-header{display:flex; align-items:center; justify-content:space-between; gap:12px}
+    .downloads{display:flex; gap:8px; flex-wrap:wrap}
+    .link{ display:inline-flex; align-items:center; gap:8px; font-size:13px; padding:8px 12px; border-radius:10px; border:1px solid rgba(148,163,184,.2); color:#dbeafe; text-decoration:none; background:#0a0f1a; }
+    .link:hover{border-color:var(--accent)}
+    .table-wrap{overflow:auto; border:1px solid rgba(148,163,184,.15); border-radius:14px}
+    table{border-collapse: collapse; width:100%; min-width: 760px; background:#060b13}
+    th, td{padding:10px 12px; border-bottom: 1px solid rgba(148,163,184,.12); font-size:13px; text-align:left}
+    th{position:sticky; top:0; background:#0b1220; z-index:1}
+    .toast{ position: fixed; right: 16px; top: 16px; z-index: 9999; background:#0b1220; border:1px solid rgba(148,163,184,.2); border-left:4px solid var(--ok); color:var(--text); padding:12px 14px; border-radius:12px; box-shadow: var(--shadow); display:none; max-width: 360px }
+    .toast.error{ border-left-color: var(--danger) } .toast.warn{ border-left-color: var(--warn) }
+    details{margin-top:20px; background:#0b1220; padding:14px; border-radius:12px; border:1px solid rgba(148,163,184,.2)}
+    summary{cursor:pointer; color:#cbd5e1; font-weight:600}
+    code{background:#0a0f1a; padding:2px 6px; border-radius:6px}
   </style>
 </head>
 <body>
   <header>
-    <h1>Credit Card Fraud Detection</h1>
-    <p>Upload your transaction data and let our AI model analyze it for potential fraud.</p>
+    <h1 class="title">Credit Card Fraud Detection</h1>
+    <p class="subtitle">Upload your transaction data (CSV/XLS/XLSX). Get predictions, preview, and downloadable reports.</p>
   </header>
-
-  <div class="container">
-    <h2>How It Works</h2>
-    <p class="description">
-      Our system uses advanced machine learning models trained on historical transaction data. 
-      When you upload your file, it goes through preprocessing (cleaning, feature encoding, scaling), 
-      and then the trained <strong>XGBoost classifier</strong> predicts the likelihood of fraudulent transactions.
-    </p>
-
-    <h2>Upload Your Data</h2>
-    <form id="uploadForm">
-      <label for="name">Name</label>
-      <input type="text" id="name" name="name" required>
-
-      <label for="email">Email</label>
-      <input type="email" id="email" name="email" required>
-
-      <label for="file">Upload CSV or Excel File</label>
-      <input type="file" id="file" name="file" accept=".csv,.xlsx" required>
-
-      <div class="checkbox">
-        <input type="checkbox" id="consent" name="consent">
-        <label for="consent">Allow my data to be used for improving the model</label>
+  <div class="container grid">
+    <section class="card">
+      <h2>Upload & Analyze</h2>
+      <form id="uploadForm">
+        <label for="name">Name *</label>
+        <input id="name" name="name" type="text" placeholder="Your name" required />
+        <label for="email">Email *</label>
+        <input id="email" name="email" type="email" placeholder="you@example.com" required />
+        <label for="file">Upload File (CSV / XLS / XLSX) *</label>
+        <input id="file" name="file" type="file" accept=".csv,.xls,.xlsx" required />
+        <div class="checkbox">
+          <input id="consent" name="consent" type="checkbox" />
+          <label for="consent">I consent to my data being used to improve the model.</label>
+        </div>
+        <button class="btn" type="submit">Run Prediction</button>
+        <div class="progress-wrap" style="display:none" id="progressWrap">
+          <progress id="progressBar" value="0" max="100"></progress>
+          <div class="progress-label">
+            <span id="progressText">Uploading…</span>
+            <span id="progressPct">0%</span>
+          </div>
+        </div>
+      </form>
+    </section>
+    <section class="card">
+      <div class="results-header">
+        <h2>Results Preview</h2>
+        <div class="downloads" id="downloads" style="display:none">
+          <a id="dlCSV" class="link" href="#" download>⬇ Download CSV</a>
+          <a id="dlXLSX" class="link" href="#" download>⬇ Download Excel</a>
+        </div>
       </div>
-
-      <button type="submit">Submit</button>
-    </form>
-
-    <div class="results" id="results" style="display:none;">
-      <h3>Results</h3>
-      <p id="output"></p>
-    </div>
+      <div id="emptyState"><p class="hint">No results yet. Upload a file to see predictions.</p></div>
+      <div class="table-wrap" id="tableWrap" style="display:none">
+        <table id="resultsTable"></table>
+      </div>
+    </section>
   </div>
 
+  <!-- ✅ New description areas -->
+  <div class="container">
+    <details>
+      <summary>What format should my CSV/XLSX follow?</summary>
+      <p>
+        Your uploaded file should match one of the following supported schemas:
+      </p>
+      <ul>
+        <li><b>creditcard.csv format</b>: columns like <code>Time, V1–V28, Amount, Class</code>.</li>
+        <li><b>merchant.csv format</b>: merchant-related columns (e.g. <code>merchant_id, category, amount, transaction_time</code>).</li>
+      </ul>
+      <p>The system will automatically preprocess your file to match the expected schema before running predictions.</p>
+    </details>
+
+    <details>
+      <summary>Why do we ask for your data?</summary>
+      <p>
+        Your uploaded transaction data is analyzed to detect potential fraud in real time.  
+        With your consent, anonymized data may also be used to retrain and improve the fraud detection model.  
+        We never share your personal information with third parties.  
+        Files remain confidential and secure during processing.
+      </p>
+    </details>
+  </div>
+
+  <div class="toast" id="toast"></div>
   <script>
-    const form = document.getElementById("uploadForm");
-    const resultsDiv = document.getElementById("results");
-    const output = document.getElementById("output");
+    const API_BASE = "http://127.0.0.1:8000";
+    const toast = document.getElementById('toast');
+    const progressWrap = document.getElementById('progressWrap');
+    const progressBar = document.getElementById('progressBar');
+    const progressPct = document.getElementById('progressPct');
+    const progressText = document.getElementById('progressText');
+    const downloads = document.getElementById('downloads');
+    const dlCSV = document.getElementById('dlCSV');
+    const dlXLSX = document.getElementById('dlXLSX');
+    const tableWrap = document.getElementById('tableWrap');
+    const emptyState = document.getElementById('emptyState');
 
-    form.addEventListener("submit", async (event) => {
-      event.preventDefault();
+    function showToast(msg, type='ok', ms=4200){
+      toast.className = 'toast' + (type==='error'?' error':type==='warn'?' warn':'');
+      toast.innerText = msg;
+      toast.style.display='block';
+      setTimeout(()=>{ toast.style.display='none'; }, ms);
+    }
 
-      const formData = new FormData(form);
-
-      const response = await fetch("http://127.0.0.1:8000/predict", {
-        method: "POST",
-        body: formData,
+    function buildTable(rows){
+      const table = document.getElementById('resultsTable');
+      table.innerHTML='';
+      if(!rows || !rows.length){
+        table.innerHTML='<tr><td style="padding:14px; color:#94a3b8">No predictions received.</td></tr>';
+        return;
+      }
+      const thead=document.createElement('thead');
+      const headerRow=document.createElement('tr');
+      Object.keys(rows[0]).forEach(k=>{
+        const th=document.createElement('th');
+        th.textContent=k;
+        headerRow.appendChild(th);
       });
+      thead.appendChild(headerRow);
+      table.appendChild(thead);
+      const tbody=document.createElement('tbody');
+      rows.forEach(r=>{
+        const tr=document.createElement('tr');
+        Object.keys(rows[0]).forEach(k=>{
+          const td=document.createElement('td');
+          td.textContent=(r[k]===null||r[k]===undefined)?'':String(r[k]);
+          tr.appendChild(td);
+        });
+        tbody.appendChild(tr);
+      });
+      table.appendChild(tbody);
+    }
 
-      const data = await response.json();
-      resultsDiv.style.display = "block";
-      output.textContent = JSON.stringify(data, null, 2);
+    function validateEmail(email){ return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(String(email).toLowerCase()); }
+
+    const form = document.getElementById('uploadForm');
+    form.addEventListener('submit',(e)=>{
+      e.preventDefault();
+      const name=document.getElementById('name').value.trim();
+      const email=document.getElementById('email').value.trim();
+      const file=document.getElementById('file').files[0];
+      const consent=document.getElementById('consent').checked;
+      if(!name){ showToast('Please enter your name.','warn'); return; }
+      if(!email){ showToast('Email is required.','warn'); return; }
+      if(!validateEmail(email)){ showToast('Please enter a valid email address.','warn'); return; }
+      if(!file){ showToast('Please choose a CSV/XLS/XLSX file.','warn'); return; }
+      const ext=file.name.split('.').pop().toLowerCase();
+      if(!['csv','xls','xlsx'].includes(ext)){ showToast('Unsupported file type.','warn'); return; }
+      const formData=new FormData();
+      formData.append('name',name);
+      formData.append('email',email);
+      formData.append('consent', consent ? 'true' : 'false');
+      formData.append('file',file);
+      const xhr=new XMLHttpRequest();
+      xhr.open('POST',`${API_BASE}/predict`,true);
+      progressWrap.style.display='block'; progressText.textContent='Uploading…'; progressBar.value=0; progressPct.textContent='0%';
+      xhr.upload.onprogress=function(e){
+        if(e.lengthComputable){
+          const pct=Math.round((e.loaded/e.total)*100);
+          progressBar.value=pct; progressPct.textContent=pct+'%';
+          if(pct>=100) progressText.textContent='Processing…';
+        }
+      };
+      xhr.onload=function(){
+        progressText.textContent='Finalizing…';
+        try{
+          const data=JSON.parse(xhr.responseText||'{}');
+          if(xhr.status>=200 && xhr.status<300 && data && data.ok){
+            if(data.processed_file_csv){
+              dlCSV.href=`${API_BASE}/download/csv/${encodeURIComponent(data.processed_file_csv)}`;
+              dlCSV.download=data.processed_file_csv;
+            }
+            if(data.processed_file_xlsx){
+              dlXLSX.href=`${API_BASE}/download/excel/${encodeURIComponent(data.processed_file_xlsx)}`;
+              dlXLSX.download=data.processed_file_xlsx;
+            }
+            downloads.style.display=(data.processed_file_csv||data.processed_file_xlsx)?'flex':'none';
+            if(Array.isArray(data.results)){
+              buildTable(data.results);
+              emptyState.style.display='none';
+              tableWrap.style.display='block';
+              showToast('Prediction complete. Downloads ready.','ok');
+            } else{
+              tableWrap.style.display='none';
+              emptyState.style.display='block';
+              showToast('Upload complete, but no results returned.','warn');
+            }
+          } else{
+            const msg=(data && data.error)?data.error:`Server error (${xhr.status}).`;
+            showToast(`Upload failed: ${msg}`,'error');
+          }
+        } catch(err){
+          showToast('Upload failed: could not parse server response.','error');
+        } finally{
+          progressWrap.style.display='none';
+        }
+      };
+      xhr.onerror=function(){ showToast('Network error during upload.','error'); progressWrap.style.display='none'; };
+      xhr.send(formData);
     });
   </script>
 </body>
