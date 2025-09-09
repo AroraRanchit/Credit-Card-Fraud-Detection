@@ -1,0 +1,9 @@
+version: "3.9"
+
+services:
+  backend:
+    volumes:
+      - .:/app
+      - ./models:/app/models
+      - ./uploads:/app/uploads
+    command: uvicorn app:app --host 0.0.0.0 --reload

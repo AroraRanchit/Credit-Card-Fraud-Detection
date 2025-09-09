@@ -1,0 +1,17 @@
+fastapi
+uvicorn
+pandas
+numpy
+scikit-learn
+xgboost
+optuna
+joblib
+python-multipart
+openpyxl
+fastapi-mail
+matplotlib
+seaborn
+python-dotenv
+email-validator
+aiosmtplib
+

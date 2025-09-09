@@ -1,0 +1,10 @@
+services:
+  backend:
+    build: .
+    container_name: ccfd-backend
+    env_file:
+      - .env         # 👈 loads your email creds
+    ports:
+      - "8000:8000"
+    volumes:
+      - .:/app
