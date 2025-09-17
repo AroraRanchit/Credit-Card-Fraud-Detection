@@ -1,135 +1,109 @@
-# 💳 Credit Card Fraud Detection
+# 💳 Credit Card Fraud Detection (CCFD)
 
-A machine learning–powered web application for detecting fraudulent credit card transactions.  
-The project combines a **FastAPI backend** with a **simple HTML frontend** for easy user interaction.  
-
-Users can:
-- Upload their transaction data (`CSV` or `Excel`).
-- Get real-time predictions on fraudulent vs. legitimate transactions.
-- Choose to allow their data to be added for further model training (opt-in).
-- Retrain the model on updated datasets when needed.
-
----
-
-## 🚀 Features
-- **Frontend (index.html)**: User-friendly interface for uploading files and viewing results.
-- **Backend (FastAPI)**: REST API that processes files and returns fraud predictions.
-- **ML Model**: Pre-trained XGBoost model stored as `fraud_detection_model.pkl`.
-- **Data Collection**: Stores user uploads in `master_dataset.csv` if consent is given.
-- **Retraining**: Supports retraining the ML model with new data.
+A full-stack machine learning project for detecting fraudulent credit card transactions.  
+Users can upload transaction datasets (CSV/Excel), get real-time predictions, view history, and download results.
 
 ---
 
 ## 📂 Project Structure
 
 ```text
-Credit-Card-Fraud-Detection/
-├── backend/
-│   ├── app.py                  # FastAPI backend
-│   ├── fraud_detection_model.pkl # Trained XGBoost model
-│   ├── requirements.txt        # Python dependencies
-│   ├── uploads/                # Raw user uploads
-│   ├── processed/              # Processed prediction results
-│   └── master_dataset.csv      # Growing dataset for retraining
-├── frontend/
-│   └── index.html              # Frontend webpage
-└── README.md                   # Project documentation
-⚙️ Installation & Setup
-Clone the repository
+ccfd/
+├── backend/                  # FastAPI backend
+│   ├── app.py                # Main FastAPI app
+│   ├── trainer.py            # Model training logic
+│   ├── emailsystem.py        # Notification/email system
+│   ├── models/               # Pretrained ML models
+│   ├── uploads/              # Raw uploaded files
+│   ├── outputs/              # Prediction outputs (CSV/Excel)
+│   ├── processed/            # Processed files for retraining
+│   ├── requirements.txt      # Backend dependencies
+│   ├── Dockerfile            # Docker image for backend
+│   └── docker-compose.yml    # Docker orchestration
+│
+├── frontend/                 # Frontend HTML + CSS
+│   ├── index.html            # Landing page + upload
+│   ├── upload.html           # File upload and results
+│   ├── history.html          # Past predictions (requires login)
+│   ├── login.html            # Login page
+│   ├── signup.html           # Signup page
+│   └── style.css             # Shared theme (green/beige pastel)
+│
+├── models/                   # Schemas + reference models
+│   ├── creditcard_model.pkl
+│   ├── merchant_model.pkl
+│   └── schemas/
+│       ├── creditcard_schema.json
+│       └── merchant_schema.json
+│
+└── README.md                 # This file
+🚀 Features
+Upload datasets (CSV or Excel) → fraud detection in real-time
+
+Download predictions in CSV or Excel format
+
+User login & signup → access your own history
+
+View history of past predictions (per user)
+
+Docker support for easy deployment
+
+Retraining pipeline → extend the model with new data
+
+⚙️ Backend Setup
+Navigate to the backend:
 
 bash
-Copy
-Edit
-git clone https://github.com/AroraRanchit/Credit-Card-Fraud-Detection.git
-cd Credit-Card-Fraud-Detection/backend
-Create a virtual environment
-
-bash
-Copy
-Edit
-python -m venv venv
-source venv/bin/activate   # On Windows use: venv\\Scripts\\activate
-Install dependencies
-
-bash
-Copy
-Edit
-pip install -r requirements.txt
-Run the FastAPI backend
-
-bash
-Copy
-Edit
-uvicorn app:app --reload
-The API will start at: http://127.0.0.1:8000
-
-Open the frontend
-
-Open frontend/index.html directly in a browser OR
-
-Serve it locally:
-
-bash
-Copy
-Edit
-cd frontend
-python -m http.server
-Then visit: http://127.0.0.1:8000
-
-🔎 How It Works
-Upload Data: User provides a CSV/Excel file of transactions.
-
-Preprocessing: Missing values are imputed, categorical features encoded.
-
-Prediction: The XGBoost model evaluates transactions.
-
-Results: Fraud likelihood is displayed on the frontend.
-
-Data Consent: If opted-in, the uploaded file is appended to master_dataset.csv.
-
-Retraining: Admins can retrain the model on the updated dataset to improve accuracy.
-
-🧑‍💻 Retraining the Model
-If you want to retrain the ML model with new data:
-
-bash
-Copy
-Edit
+Copy code
 cd backend
-python retrain.py
-This will:
+Install dependencies:
 
-Load master_dataset.csv
+bash
+Copy code
+pip install -r requirements.txt
+Run the server:
 
-Retrain the XGBoost model with Optuna optimization
+bash
+Copy code
+uvicorn app:app --reload
+API will be live at → http://127.0.0.1:8000
 
-Save the updated model as fraud_detection_model.pkl
+🎨 Frontend Setup
+The frontend/ folder has static HTML/CSS.
+You can serve it directly (open in browser) or integrate with FastAPI static routes.
 
-🌐 Deployment
-Backend: Can be deployed on Render, Heroku, AWS, or any server that supports FastAPI + Uvicorn.
+Main pages:
 
-Frontend: Can be hosted via GitHub Pages, Netlify, or served directly by the backend.
+index.html → Upload & get results
 
-Model File: Large .pkl files (>100 MB) may require Git LFS or cloud storage.
+upload.html → Detailed upload
 
-🤝 Contributing
-Contributions are welcome!
+history.html → View past predictions (login required)
 
-Fork the repo
+login.html → Login
 
-Create a feature branch
+signup.html → Register
 
-Submit a Pull Request
+style.css → Shared pastel green/beige theme
 
-📜 License
-This project is licensed under the MIT License.
+🐳 Docker Setup
+Build and run with Docker:
 
-👤 Author
+bash
+Copy code
+docker-compose up --build
+🧠 Model Training
+You can retrain models using trainer.py.
+It supports schema detection, so new datasets with different columns can still be integrated.
+
+📌 To Do
+ Connect login/signup with FastAPI authentication
+
+ Serve frontend through backend routes
+
+ Add role-based access for admin vs users
+
+ Improve history filtering & download options
+
+👨‍💻 Author
 Ranchit Arora
-GitHub Profile
-
-pgsql
-Copy
-Edit
-
-Do you also want me to add **badges** (like Python version, FastAPI, license) at the top so it looks even more professional on GitHub?
