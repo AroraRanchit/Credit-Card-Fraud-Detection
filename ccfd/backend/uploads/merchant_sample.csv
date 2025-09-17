@@ -1,0 +1,3 @@
+TransactionID,TransactionDate,Amount,TransactionType,Location
+1,2023-01-01 10:00:00,120,Purchase,New York
+2,2023-01-01 11:15:00,500,Refund,Los Angeles

@@ -1,0 +1,6 @@
+TransactionID,TransactionDate,Amount,MerchantID,TransactionType,Location
+10001,2025-08-01,250.75,M123,Purchase,New York
+10002,2025-08-02,1200.5,M456,Withdrawal,Los Angeles
+10003,2025-08-03,75.0,M789,Purchase,Chicago
+10004,2025-08-04,320.4,M321,Transfer,Houston
+10005,2025-08-05,4500.0,M654,Purchase,San Francisco
