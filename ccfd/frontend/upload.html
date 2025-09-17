@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Upload Data</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <header>
+    <h1>⬆ Upload Data</h1>
+    <nav>
+      <a href="index.html">Home</a>
+      <a href="upload.html">Upload</a>
+      <a href="history.html">History</a>
+      <a href="signup.html">Sign Up</a>
+      <a href="login.html">Login</a>
+    </nav>
+  </header>
+
+  <div class="container">
+    <div class="card">
+      <form id="uploadForm" enctype="multipart/form-data">
+        <label>Select File (CSV/XLSX):</label>
+        <input type="file" name="file" accept=".csv,.xlsx" required>
+        <button type="submit" class="btn">Upload & Analyze</button>
+      </form>
+    </div>
+
+    <div class="card" id="resultsCard" style="display:none;">
+      <h2>Results</h2>
+      <div id="results"></div>
+
+      <h3>Download Options</h3>
+      <a id="downloadCSV" href="#" class="btn">⬇ CSV</a>
+      <a id="downloadXLSX" href="#" class="btn">⬇ Excel</a>
+      <a id="downloadCSS" href="#" class="btn">⬇ CSS Table</a>
+    </div>
+  </div>
+
+  <footer>
+    <p>© 2025 Credit Card Fraud Detection</p>
+  </footer>
+
+  <script>
+    document.getElementById("uploadForm").addEventListener("submit", function(e) {
+      e.preventDefault();
+      
+      // TODO: Replace with backend integration
+      const sampleResults = `
+        <table>
+          <thead>
+            <tr><th>ID</th><th>Amount</th><th>Result</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>1</td><td>149.62</td><td>✅ Legit</td></tr>
+            <tr><td>2</td><td>378.66</td><td>⚠️ Fraud</td></tr>
+          </tbody>
+        </table>
+      `;
+      document.getElementById("results").innerHTML = sampleResults;
+      document.getElementById("resultsCard").style.display = "block";
+
+      // Simulated download links
+      document.getElementById("downloadCSV").href = "processed.csv";
+      document.getElementById("downloadXLSX").href = "processed.xlsx";
+
+      // CSS file download
+      const cssContent = `
+        table { border-collapse: collapse; width: 100%; }
+        th, td { border: 1px solid #ccc; padding: 6px; }
+        tr:nth-child(even) { background: #d0e2c4; }
+      `;
+      const blob = new Blob([cssContent], {type: "text/css"});
+      document.getElementById("downloadCSS").href = URL.createObjectURL(blob);
+      document.getElementById("downloadCSS").download = "table.css";
+    });
+  </script>
+</body>
+</html>

@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Upload History</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <header>
+    <h1>📜 Upload History</h1>
+    <nav>
+      <a href="index.html">Home</a>
+      <a href="upload.html">Upload</a>
+      <a href="history.html">History</a>
+      <a href="signup.html">Sign Up</a>
+      <a href="login.html">Login</a>
+    </nav>
+  </header>
+
+  <div class="container">
+    <div class="card">
+      <h2>Your Previous Uploads</h2>
+      <div id="loading">Loading your history...</div>
+      <table id="historyTable" style="display:none;">
+        <thead>
+          <tr>
+            <th>Date</th>
+            <th>File Name</th>
+            <th>Type</th>
+            <th>Download</th>
+          </tr>
+        </thead>
+        <tbody id="historyBody"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <footer>
+    <p>© 2025 Credit Card Fraud Detection</p>
+  </footer>
+
+  <script>
+    async function loadHistory() {
+      const token = localStorage.getItem("authToken");
+
+      // If not logged in, redirect
+      if (!token) {
+        alert("You must be logged in to view your history.");
+        window.location.href = "login.html";
+        return;
+      }
+
+      try {
+        // 🔗 Call backend history endpoint
+        const res = await fetch("http://localhost:8000/history", {
+          method: "GET",
+          headers: {
+            "Authorization": `Bearer ${token}`
+          }
+        });
+
+        if (!res.ok) {
+          throw new Error("Unauthorized or failed to fetch history.");
+        }
+
+        const uploads = await res.json();
+
+        const historyBody = document.getElementById("historyBody");
+        historyBody.innerHTML = "";
+
+        uploads.forEach(u => {
+          const row = `
+            <tr>
+              <td>${u.upload_date}</td>
+              <td>${u.file_name}</td>
+              <td>${u.file_type}</td>
+              <td><a href="/download/${u.upload_id}" class="btn">⬇</a></td>
+            </tr>
+          `;
+          historyBody.innerHTML += row;
+        });
+
+        document.getElementById("loading").style.display = "none";
+        document.getElementById("historyTable").style.display = "table";
+      } catch (err) {
+        console.error(err);
+        document.getElementById("loading").innerText = "Failed to load history.";
+      }
+    }
+
+    loadHistory();
+  </script>
+</body>
+</html>
